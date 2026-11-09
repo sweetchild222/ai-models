@@ -25,7 +25,7 @@ def load_data():
 
     batch_size = 100
 
-    dataset = MNIST(root='./dataset', transform=transforms.Compose([transforms.ToTensor()]), train=True, download=True)
+    dataset = MNIST(root='./', transform=transforms.Compose([transforms.ToTensor()]), train=True, download=True)
     
     return DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4), dataset.data.shape
 
