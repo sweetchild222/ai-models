@@ -30,12 +30,12 @@ def load_data():
     return DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=4), dataset.data.shape
 
 
-def loss(x, x_hat, mean, log_var):
+def loss_function(x, x_hat, mean, log_var):
 
     reproduction_loss = nn.functional.binary_cross_entropy(x_hat, x, reduction='sum')
     KLD = - 0.5 * torch.sum(1+ log_var - mean.pow(2) - log_var.exp())
     
-    return reproduction_loss + KLD
+    return (reproduction_loss + KLD) / x.shape[-1]
 
 
 def train(data, model):
@@ -57,7 +57,7 @@ def train(data, model):
 
             x_hat, mean, log_var = model(x)
 
-            loss_val = loss(x, x_hat, mean, log_var)
+            loss_val = loss_function(x, x_hat, mean, log_var)
 
             total_loss += loss_val.item()
             total_count += x.size(0)
@@ -65,7 +65,7 @@ def train(data, model):
             loss_val.backward()
             optimizer.step()
     
-        print("epoch: " + str(epoch + 1) + "/" + str(epochs) + "\tloss: " + str(total_loss / total_count))
+        print("epoch: " + str(epoch + 1) + "/" + str(epochs) + "\tavg loss: " + str(total_loss / total_count))
 
 
 def generate(model, x_dim, latent_dim):
@@ -106,6 +106,5 @@ def main():
     train(train_data, model)
 
     generate(model, x_dim=data_shape[-1], latent_dim=latent_dim)
-
 
 main()
